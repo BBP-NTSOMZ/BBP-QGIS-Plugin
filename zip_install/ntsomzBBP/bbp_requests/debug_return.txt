@@ -1,0 +1,63 @@
+{
+  "code": 200,
+  "result": [
+    {
+      "platform_id": "AQUA",
+      "sensors_ids": [
+        "MODIS"
+      ],
+      "description": {
+        "ru": "Изучение динамики атмосферных показателей (влажность, химический состав), изучение облачного покрова и концентрации взвешенных частиц (аэрозолей), изучение температурного режима океана, мониторинг динамики ледников",
+        "en": "Atmospheric dynamics/water and energy cycles, cloud formation, precipitation and radiative properties, air/sea fluxes of energy and moisture, sea ice extent and heat exchange with the atmosphere"
+      },
+      "name": {
+        "ru": "Aqua",
+        "en": "Aqua"
+      }
+    },
+    {
+      "platform_id": "BKA",
+      "sensors_ids": [
+        "MSS",
+        "PSS"
+      ],
+      "description": {
+        "ru": "Мониторинг техногенных и природных чрезвычайных ситуаций, обнаружение очагов лесных пожаров, мониторинг состояния окружающей среды, ледового и снежного покровов, картографирование",
+        "en": "Disaster monitoring, forest fire detection, land surface, environmental monitoring, cartography"
+      },
+      "name": {
+        "ru": "БКА",
+        "en": "BKA"
+      }
+    },
+    {
+      "platform_id": "EO1",
+      "sensors_ids": [
+        "HYPERION"
+      ],
+      "description": {
+        "ru": "Мониторинг природных ресурсов",
+        "en": "Land surface, earth resources"
+      },
+      "name": {
+        "ru": "EO-1",
+        "en": "EO-1"
+      }
+    },
+    {
+      "platform_id": "KV1",
+      "sensors_ids": [
+        "MSS",
+        "PSS"
+      ],
+      "description": {
+        "ru": "Мониторинг техногенных и природных чрезвычайных ситуаций, обнаружение очагов лесных пожаров, мониторинг состояния окружающей среды, ледового и снежного покровов, картографирование",
+        "en": "Disaster monitoring, forest fire detection, land surface, environmental monitoring, cartography"
+      },
+      "name": {
+        "ru": "Канопус-B №1",
+        "en": "KANOPUS-V 1"
+      }
+    }
+  ]
+}
