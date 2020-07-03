@@ -41,7 +41,7 @@ from qgis.core import (
 )
 from datetime import datetime
 from . import bbp_requests
-from .bbp_requests import bbp_order, bbp_key, bbp_search
+from .bbp_requests import bbp_order, bbp_search
 from .bbp_requests.iLayers.layered import create_layer
 from .bbp_requests.bbp_objects import (
     Scene, 
@@ -52,6 +52,7 @@ from .bbp_requests.bbp_objects import (
     TileService, 
     Point
 )
+from .params.setting import BBPSetting
 from typing import Any, List
 #from dataclasses import dataclass,field
 
@@ -120,6 +121,8 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             4. order
             5. available
         """
+        key: str = BBPSetting().instance.key
+        self.leIDKey.setText(key)
         self.tblScenes.setColumnCount(2)
         self.tblScenes.setHorizontalHeaderLabels(["Scene ID", "Product"])
             #["Selected", "Scene ID", "Product", "Order", "Available"])
@@ -239,7 +242,7 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def on_registed_ID_click(self):
         key = self.leIDKey.text()
-        bbp_key.APIKey(key)
+        BBPSetting().setAPIKey(key)
         self.loadOrders()
         self.updateTabWidget()
 

@@ -9,5 +9,7 @@
 			"path": "D:\\Project\\NTSOMZ\\EKBBP_get\\pasport_get"
 		}
 	],
-	"settings": {	}
+	"settings": {
+		"python.pythonPath": "c:\\PROGRA~1\\QGIS3~1.10\\bin\\python3.exe"
+	}
 }
