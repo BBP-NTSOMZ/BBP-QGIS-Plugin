@@ -251,6 +251,7 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         ret = self.loadOrders()
         if not ret:
             BBPSetting().setAPIKey(prev_key)
+            self.leIDKey.setText(prev_key)
         self.updateTabWidget()
 
     def on_tableScenes_item_change(self, item: QTableWidgetItem):
