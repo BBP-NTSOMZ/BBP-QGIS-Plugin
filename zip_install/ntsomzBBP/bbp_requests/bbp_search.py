@@ -1,75 +1,12 @@
 from typing import List, Union, Optional
 from datetime import datetime
 from os.path import dirname, join
-from . import bbp_key, geometry
+from . import geometry
 from .bbp_objects import Scene, BrowseImage, BoundingShape
 # import bbp_key
 # import geometry
 import requests
 import json
-
-
-# class Scene():
-
-#     """
-#     acquisition_date
-#     acquisition_date_start
-#     acquisition_date_stop
-#     available_to_order
-#     bands
-#     bands_names
-#     bounding_shape
-#     browseimage
-#     catalogization_date
-#     cloud_cover
-#     composite_sensors
-#     frame
-#     orbit_pass
-#     orbit_pass_direction
-#     platform_id
-#     products
-#     resolution
-#     L
-#     M
-#     H
-#     route	
-#     scene_id	
-#     sensor_id	
-#     sensor_azimuth_angle	
-#     sensor_zenith_angle	
-#     sun_azimuth_angle
-#     sun_zenith_angle
-#     """
-
-#     def __init__(self, **kwargs):
-#         self.attributes = kwargs
-#         self.bounding_shape = kwargs.get("bounding_shape")
-#         self.browseimage = kwargs.get("browseimage")
-
-#     def getBoundingShape(self):
-#         if not self.bounding_shape is None:
-#             geom = self.bounding_shape.get("geometry")
-#             if not geom is None:
-#                 geom = json.dumps(geom)
-#                 shape = geometry.GeoJSONtoQgsGeomentry(geom)
-#                 return shape
-#             else:
-#                 return None
-#         return None
-
-#     def getBrowseImage(self):
-#         if not self.browseimage is None:
-#             ret = None
-#             for key,val in self.browseimage.items():
-#                 ret = val
-#                 break
-#             return ret
-#         return None
-
-#     def __str__(self):
-#         return "{} access image: {}, boundrect: {}".format(str(self.attributes.get("scene_id")),
-#         str(self.getBrowseImage()),
-#          str(self.getBoundingShape()))
 
 class MinMaxLimits():
     def __init__(self,_min, _max):
@@ -372,13 +309,15 @@ class requestSearch():
         return ret
 
     def __postrequest__(self):
-        api_location = "https://bbp.ntsomz.ru"
+        api_location = BBPSetting().server
+        api_key = BBPSetting().getRequestPart()
+
         reqbody = "/api/v1/resources/scenes"
         reqdata = self.__request__()
         p = join(dirname(__file__),"send_search.json")
         with open(p,"w") as f:
             f.write(str(self))
-        req = api_location+reqbody+"?api_key="+bbp_key.key
+        req = api_location+reqbody+api_key
         p = join(dirname(__file__),"post_search.json")
         res = requests.post(req, json = reqdata)
         con = res.text

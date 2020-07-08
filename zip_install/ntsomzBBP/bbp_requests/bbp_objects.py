@@ -301,6 +301,7 @@ class Order():
     def getProducts(self)->List[Product]:
         ret = None
         try:
+            #subret = [Product(id_key, product_key) for id_key, product_vals in self.products.items()]
             ret = [Product(id_key, product_key) for id_key, product_vals in self.products.items() for product_key, prod_val in product_vals.items()]
         except AttributeError as exc:
             return list()
