@@ -3,7 +3,7 @@ from qgis.PyQt.QtWidgets import QListWidgetItem, QTableWidgetItem, QMessageBox
 from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsProject
 from typing import List, Union
 from ..bbp_objects import TileService, Scene, Product
-from ..bbp_key import APIKey
+from ...params.setting import BBPSetting
 from .quick_ref import georeference, load_url
 from os.path import dirname
 
@@ -117,7 +117,7 @@ def create_layer(product: Product, tileservice: TileService, scene: Scene):
         boundingbox = [*xform.transform(boundingbox[0],boundingbox[1]), *xform.transform(boundingbox[2],boundingbox[3])]
         
         rasterLayer = create_raster_file(url, name, 
-                            additional_str = APIKey().getRequestPart(), 
+                            additional_str = BBPSetting().getRequestPart(), 
                             projection = "EPSG:3857", 
                             boundingRect = boundingbox, 
                             zmin = 0, zmax = 18)
@@ -131,7 +131,7 @@ def create_layer(product: Product, tileservice: TileService, scene: Scene):
         xform = QgsCoordinateTransform(crsSrc, crsDest, transformContext)
         boundingbox = [*xform.transform(boundingbox[0],boundingbox[1]), *xform.transform(boundingbox[2],boundingbox[3])]
         rasterLayer = create_raster_XYZ(url, name, 
-                            additional_str = APIKey().getRequestPart(), 
+                            additional_str = BBPSetting().getRequestPart(), 
                             projection = "EPSG:3857", 
                             boundingRect = QgsRectangle(*boundingbox), 
                             zmin = tileservice.min_zoom, zmax = tileservice.max_zoom)

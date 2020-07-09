@@ -33,7 +33,7 @@ from .ntsomzBBP_dockwidget_order import NTSOMZ_BBPCatalogDockWidget
 import os.path
 
 
-class NTSOMZ_BBPCatalog:
+class MyQGIS_Plugin:
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
@@ -52,12 +52,11 @@ class NTSOMZ_BBPCatalog:
 
         # initialize locale
         userLocale = QSettings().value('locale/userLocale')
-        #QMessageBox.about(None, "NTSOMZ_BBPCatalog", "__init__: "+str(userLocale))
         locale = userLocale[0:2]
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'NTSOMZ_BBPCatalog_{}.qm'.format(locale))
+            'MyQGIS_Plugin{}.qm'.format(locale))
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -66,7 +65,7 @@ class NTSOMZ_BBPCatalog:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&RKS Basic Products Bank  ')
+        self.menu = self.tr(u'&Plugin Products Bank  ')
         # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'NTSOMZ_BBPCatalog')
         self.toolbar.setObjectName(u'NTSOMZ_BBPCatalog')

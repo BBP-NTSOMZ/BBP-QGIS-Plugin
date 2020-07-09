@@ -1,7 +1,8 @@
 import requests
 import json
 from typing import List
-from . import bbp_key
+from ..params.setting import BBPSetting
+from .debug import RUN_TYPE_DEBUG, debug_info_path
 from os.path import dirname, join
 
 class Sensor():
@@ -48,17 +49,16 @@ class Sattelites():
         self.__entities__ = self.__form_structures__()
 
     def __getrequest__(self)->str:
-        api_location = "https://bbp.ntsomz.ru"
+        api_location = BBPSetting().server
+        api_key = BBPSetting().getRequestPart()
 
         reqbody = "/api/v1/resources/reference/platforms"
-        req = api_location+reqbody+"?api_key="+bbp_key.key
+        req = api_location+reqbody+api_key
         print(req)
-        p = join(dirname(__file__), "get_platforms.json")
+        p = debug_info_path("get_platforms.json")
         res = None
-        DEBUG = False
-        if DEBUG:
-            loc_dir = dirname(__file__)
-            debug_file = join(loc_dir, "debug_geometry.json")
+        if RUN_TYPE_DEBUG:
+            debug_file = debug_info_path("debug_geometry.json")
             print(debug_file)
             with open(debug_file, "r", encoding = "utf-8") as f:
                 text = f.read()
