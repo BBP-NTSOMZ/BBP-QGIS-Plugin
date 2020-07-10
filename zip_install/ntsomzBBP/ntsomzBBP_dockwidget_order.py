@@ -41,7 +41,7 @@ from qgis.core import (
 )
 from datetime import datetime
 from . import bbp_requests
-from .bbp_requests import bbp_order, bbp_search
+from .bbp_requests import bbp_order, bbp_key, bbp_search
 from .bbp_requests.iLayers.layered import create_layer
 from .bbp_requests.bbp_objects import (
     Scene, 
@@ -52,7 +52,6 @@ from .bbp_requests.bbp_objects import (
     TileService, 
     Point
 )
-from .params.setting import BBPSetting
 from typing import Any, List
 #from dataclasses import dataclass,field
 
@@ -121,8 +120,6 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             4. order
             5. available
         """
-        key: str = BBPSetting().instance.key
-        self.leIDKey.setText(key)
         self.tblScenes.setColumnCount(2)
         self.tblScenes.setHorizontalHeaderLabels(["Scene ID", "Product"])
             #["Selected", "Scene ID", "Product", "Order", "Available"])
@@ -132,12 +129,11 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         event.accept()
 
     def loadOrders(self):
-        ret = True
         if self.request_order is None:
             self.request_order = bbp_order.requestOrders()
             if self.request_order is None:
                 QMessageBox.about(self, "NTSOMZ_BBPCatalog", "Order request Failed")
-                return False
+                return
         current_orders = None
         current_scenes = None
         current_orders = self.request_order.getOrders()
@@ -146,7 +142,6 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             QMessageBox.about(self, "NTSOMZ_BBPCatalog", "Request failed. Possible reasons:\n 1. Server is down.\n 2. API key is invalid.")
             self.scenes = None
             self.orders = None
-            ret = False
         else:
             current_orders = [checkedDataStructure(False, i) for i in current_orders]
             current_scenes = [checkedDataStructure(False, j) for i in current_orders for j in i.data.getProducts() if not j.tile_service is None]
@@ -162,11 +157,9 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     if i.data == j.data:
                         i.isChecked = j.isChecked
             return ListInQuestion
-        if ret:
-            self.orders = crosscheck(self.orders, current_orders)
-            self.scenes = crosscheck(self.scenes, current_scenes)
-            self.updateTabWidget()
-        return ret
+        self.orders = crosscheck(self.orders, current_orders)
+        self.scenes = crosscheck(self.scenes, current_scenes)
+        self.updateTabWidget()
 
     # def updateOrderTable(self):
     #     """
@@ -246,12 +239,8 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def on_registed_ID_click(self):
         key = self.leIDKey.text()
-        prev_key = BBPSetting().instance.key
-        BBPSetting().setAPIKey(key)
-        ret = self.loadOrders()
-        if not ret:
-            BBPSetting().setAPIKey(prev_key)
-            self.leIDKey.setText(prev_key)
+        bbp_key.APIKey(key)
+        self.loadOrders()
         self.updateTabWidget()
 
     def on_tableScenes_item_change(self, item: QTableWidgetItem):

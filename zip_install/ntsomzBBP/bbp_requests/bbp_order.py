@@ -1,5 +1,5 @@
 from typing import List, Union, Optional, Any
-from ..params.setting import BBPSetting
+from .bbp_key import APIKey, key, attr_key
 from .bbp_objects import Order, Product, TileService, Point
 #from dataclasses import dataclass,field
 from datetime import datetime
@@ -75,12 +75,10 @@ class requestOrders():
         self.sort            = sort            
 
     def __request__(self):
-        
-        api_location = BBPSetting().server
-        api_key = BBPSetting().getRequestPart()
-
+        api_location = "https://bbp.ntsomz.ru"
         reqbody = "/api/v1/resources/orders"
-        req = api_location+reqbody+api_key
+        reqkey = APIKey().getRequestPart()
+        req = api_location+reqbody+reqkey
         p = dirname(__file__)
         p = join(p,"get_orders.json")
         res = requests.get(req)

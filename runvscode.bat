@@ -28,4 +28,4 @@ set PYTHONPATH=%PYTHONPATH%;%OSGEO4W_ROOT%\apps\qgis\python\qgis\PyQt
 
 path %PATH%;%OSGEO4W_ROOT%
 
-start /d "c:\Users\NCrit\AppData\Local\Programs\Microsoft VS Code\" Code.exe
+start /d "C:\Users\pankin_av\Programs\Microsoft VS Code\" Code.exe
