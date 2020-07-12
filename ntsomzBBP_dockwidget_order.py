@@ -98,19 +98,6 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         super(NTSOMZ_BBPCatalogDockWidget, self).setupUi(parent)
         #self.setupOrdersTab()
         self.setupScenesTab()
-        
-    # def setupOrdersTab(self):
-    #     """
-    #     orders columns:
-    #         1. checkbox
-    #         2. orderID
-    #         3. products
-    #         4. status
-    #         5. button-reorder
-    #     """
-    #     self.tblOrders.setColumnCount(5)
-    #     self.tblOrders.setHorizontalHeaderLabels(["Selected", "ID", "Name", "Products", "Status"])
-
     
     def setupScenesTab(self):
         """
@@ -151,7 +138,6 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             current_orders = [checkedDataStructure(False, i) for i in current_orders]
             current_scenes = [checkedDataStructure(False, j) for i in current_orders for j in i.data.getProducts() if not j.tile_service is None]
             print(current_scenes)
-            #QMessageBox.about(self, "NTSOMZ_BBPCatalog", str(current_scenes))
         def crosscheck(ListReference:List[checkedDataStructure], ListInQuestion:List[checkedDataStructure]):
             if ListReference is None:
                 return ListInQuestion
@@ -168,34 +154,6 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             self.updateTabWidget()
         return ret
 
-    # def updateOrderTable(self):
-    #     """
-    #     orders columns:
-    #         1. checkbox
-    #         2. orderID
-    #         3. responsive_id
-    #         4. products
-    #         5. state
-    #     """
-    #     self.tblOrders.clear()
-    #     self.tblOrders.setHorizontalHeaderLabels(["Selected", "ID", "Name", "Products", "Status"])
-    #     if self.orders is None:
-    #         return
-    #     self.tblOrders.setRowCount(len(self.orders))
-    #     for index, order in enumerate(self.orders):
-    #         isChecked: bool = order.isChecked
-    #         order:bbp_order.Order = order.data
-    #         chbx = QTableWidgetItem()
-    #         check_state = Qt.Checked if isChecked else Qt.Unchecked
-    #         chbx.setCheckState(check_state)
-    #         self.tblOrders.setItem(index, 0, chbx)
-    #         self.tblOrders.setItem(index, 1, QTableWidgetItem(str(order.id)))
-    #         self.tblOrders.setItem(index, 2, QTableWidgetItem(str(order.responsive_id)))
-    #         products = order.getProducts()
-    #         products = "\n".join([str(i) for i in products])
-    #         self.tblOrders.setItem(index, 3, QTableWidgetItem(products))
-    #         self.tblOrders.setItem(index, 4, QTableWidgetItem(order.state))
-
     def updateSceneTable(self):
         """
         scenes columns:
@@ -205,7 +163,6 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """
         self.tblScenes.clear()
         self.tblScenes.setHorizontalHeaderLabels(["Scene ID", "Product"])
-        #self.tblScenes.setHorizontalHeaderLabels(["Selected", "Scene ID", "Product", "Order", "Available"])
         if self.scenes is None:
             return
         local_scenes = [i for i in self.scenes if i.data.tile_service]
@@ -232,17 +189,11 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             pWidget->setLayout(pLayout);
             ui.table->setCellWidget(i, 3, pWidget);
             """
-            # check_state = Qt.Checked if isChecked else Qt.Unchecked
-            # chbx.setCheckState(check_state)
-            #self.tblScenes.setItem(index, 0, chbx)
             self.tblScenes.setItem(index, 0, QTableWidgetItem(str(scene.id)))
             self.tblScenes.setItem(index, 1, QTableWidgetItem(str(scene.product)))
-            # self.tblScenes.setItem(index, 2, QTableWidgetItem(str("N/D" if scene.parent is None else scene.parent.id)))
-            # self.tblScenes.setItem(index, 3, QTableWidgetItem("Preview" if scene.tile_service is None else "Tile Service"))
 
     def updateTabWidget(self):
         self.updateSceneTable()
-        # self.updateOrderTable()
 
     def on_registed_ID_click(self):
         key = self.leIDKey.text()
@@ -257,10 +208,8 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def on_tableScenes_item_change(self, item: QTableWidgetItem):
         r = item.row()
         c = item.column()
-        #QMessageBox.about(self, "NTSOMZ_BBPCatalog", "on_tableScenes_item_change\n"+":".join([str(r), str(c)]))
         itemData = None if r >= len(self.scenes) and r < 0 else self.scenes[r]
-        if itemData is None:
-            #QMessageBox.about(self, "NTSOMZ_BBPCatalog", "on_tableScenes_item_change\n"+"itemData is None")        
+        if itemData is None:  
             return 
         if not itemData.layer is None:
             try:
@@ -269,46 +218,11 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 itemData.layer = None
         if itemData.layer is None:
             layer = self.createMapLayer(itemData.data)
-            #QMessageBox.about(self, "NTSOMZ_BBPCatalog", "on_tableScenes_item_change\n"+str(layer)) 
             if not layer is None: 
                 itemData.layer = layer
                 self.scenes[r] = itemData
                 proj = QgsProject.instance()
                 proj.addMapLayer(layer)
-        # if c == 0:
-        #     checkstate = item.checkState()
-        #     checkstate = True if checkstate == Qt.Checked else False
-        #     last_state = self.scenes[r].isChecked if r < len(self.scenes) else None
-            
-        #     #QMessageBox.about(self, "NTSOMZ_BBPCatalog", "on_tableScenes_item_change: "+ str(r)+" : "+str(c))
-        #     if last_state is None: return
-        #     if checkstate and not last_state:
-        #         for i in self.scenes:
-        #             i.isChecked = False
-        #         self.scenes[r].isChecked = True
-        #         self.updateSceneTable()
-        #         self.updateLayer()
-        #     elif not checkstate and last_state:
-        #         self.scenes[r].isChecked = False
-        #         self.updateLayer()
-
-    # def on_tableOrders_item_change(self, item: QTableWidgetItem):
-    #     r = item.row()
-    #     c = item.column()
-    #     if c == 0:
-    #         checkstate = item.checkState()
-    #         checkstate = True if checkstate == Qt.Checked else False
-    #         last_state = self.orders[r].isChecked if r < len(self.orders) else None
-            
-    #         #QMessageBox.about(self, "NTSOMZ_BBPCatalog", "on_tableOrders_item_change: "+ str(r)+" : "+str(c))
-    #         if last_state is None: return
-    #         if checkstate and not last_state:
-    #             for i in self.orders:
-    #                 i.isChecked = False
-    #             self.orders[r].isChecked = True
-    #             self.updateOrderTable()
-    #         elif not checkstate and last_state:
-    #             self.orders[r].isChecked = False
 
     def removeMapLayer(self):
         if not self.scene_layer is None:
@@ -319,7 +233,6 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     proj.removeMapLayer(self.scene_layer.id())
             except RuntimeError as rex:
                 pass
-                #QMessageBox.about(self, "removeMapLayer", "\n ".join([str(rex)]))
             self.scene_layer = None
 
     def createMapLayer(self,product):
@@ -337,13 +250,11 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         datatype = "Preview" if tile_service is None else "Tiles"
         self.removeMapLayer()
         if self.scene_layer is None:
-            #QMessageBox.about(self, "Loading a layer", "\n ".join([str(datatype), str(tile_service), str(scene_found)]))
             layer = create_layer(product, tile_service, scene_found)
             if not layer is None:
                 self.scene_layer = layer
                 proj = QgsProject.instance()
                 proj.addMapLayer(self.scene_layer)
-
 
     def updateLayer(self):
         checked_Scene = None

@@ -33,7 +33,7 @@ from .ntsomzBBP_dockwidget_order import NTSOMZ_BBPCatalogDockWidget
 import os.path
 
 
-class MyQGIS_Plugin:
+class NTSOMZ_BBPCatalog:
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
