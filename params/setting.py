@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+#from dataclasses import dataclass, field
 from typing import Optional, List
 from os.path import dirname, join
 import json
@@ -6,12 +6,17 @@ import json
 class BBPSetting:
 
     __key_prefix__ = "?api_key="
-    @dataclass
+    #@dataclass
     class __StaticInstant__:
 
-        key: str = field(default = str)
-        server: str = field(default = "https://bbp.ntsomz.ru")
+        # key: str = field(default = str)
+        # server: str = field(default = "https://bbp.ntsomz.ru")
 
+        def __init__(self, key:str, server:str = "https://bbp.ntsomz.ru"):
+            self.key = key
+            self.server = server
+            self.__post_init__()
+        
         def __post_init__(self):
             print("post_init", self.key, self.server)
             #self.key: str = key

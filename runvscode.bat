@@ -13,7 +13,7 @@ REM path %PATH%;C:\Users\Frank\bin
 path %PATH%;C:\Program Files\7-Zip
 REM path %PATH%;C:\ProgramData\chocolatey\bin
 path %PATH%;C:\Program Files\Git\cmd
-path %PATH%;C:\Program Files\nodejs\
+rem path %PATH%;C:\Program Files\nodejs\
 
 set QGIS_PREFIX_PATH=%OSGEO4W_ROOT:\=/%/apps/qgis
 set GDAL_FILENAME_IS_UTF8=YES
@@ -28,4 +28,4 @@ set PYTHONPATH=%PYTHONPATH%;%OSGEO4W_ROOT%\apps\qgis\python\qgis\PyQt
 
 path %PATH%;%OSGEO4W_ROOT%
 
-start /d "c:\Users\NCrit\AppData\Local\Programs\Microsoft VS Code\" Code.exe
+rem start /d "c:\Users\NCrit\AppData\Local\Programs\Microsoft VS Code\" Code.exe
