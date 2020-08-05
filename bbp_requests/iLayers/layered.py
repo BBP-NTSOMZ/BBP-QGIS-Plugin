@@ -31,7 +31,7 @@ class LayerInfo:
         return ret
 
 def create_raster_XYZ(url:str, name:str, additional_str:str = None, projection: str = "EPSG3857", boundingRect: QgsRectangle = None, zmin:int = 0, zmax:int = 18):
-    dataSource:str = "url="+url#+additional_str
+    dataSource:str = "url="+url+additional_str
     typestr:str = "type=xyz"
     zmax:str = "zmax="+str(zmax)
     zmin:str = "zmin="+str(zmin)
