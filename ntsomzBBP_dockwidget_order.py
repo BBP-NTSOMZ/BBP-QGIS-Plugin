@@ -95,6 +95,7 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.ordered_scenes = dict()
         self.request_order = None
 
+        self.regMsg = False
         self.mosaicList = None
         self.bspApiKey = None
 
@@ -316,6 +317,7 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.updateSceneTable()
 
     def on_registed_ID_click(self):
+        self.regMsg = False
         key = self.leIDKey.text()
         prev_key = BBPSetting().instance.key
         BBPSetting().setAPIKey(key)
@@ -323,6 +325,8 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if not retScene:
             BBPSetting().setAPIKey(prev_key)
             self.leIDKey.setText(prev_key)
+            self.regMsg = True
+            QMessageBox.about(self, "NTSOMZ_BBPCatalog", "Key registration failed.\n\nPossible reasons:\n1. API key is invalid.\n2. Server is down.")
         self.updateTabWidget()
 
         # BSP part
@@ -336,11 +340,17 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             if self.scenes is None:
                 len_scenes = 0
 
-        if len_scenes == 0 or not retBsp:
-            QMessageBox.about(self, "NTSOMZ_BBPCatalog", "Request failed. Can`t load scenes or/and mosaics.\nPossible reasons:\n"
-                                                         "1. No scenes or/and mosaics for this API key.\n"
-                                                         "2. API key is invalid.\n"
-                                                         "3. Server is down.")
+        if not self.regMsg:
+            scenesMsg = ''
+            bspMsg = ''
+
+            if len_scenes == 0:
+                scenesMsg = "Can`t load scenes. Orders not found in BBP interactive catalog.\n"
+
+            if not retBsp:
+                bspMsg = "\nNo mosaics available for the specified API key.\n"
+
+            QMessageBox.about(self, "NTSOMZ_BBPCatalog", scenesMsg+bspMsg)
 
     def on_tableScenes_item_change(self, item: QTableWidgetItem):
         r = item.row()
