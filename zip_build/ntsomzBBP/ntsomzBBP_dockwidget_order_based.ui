@@ -21,18 +21,31 @@
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="5" column="0">
-     <widget class="QPushButton" name="btnRegID">
-      <property name="text">
-       <string>Register ID key</string>
-      </property>
-     </widget>
-    </item>
     <item row="1" column="0">
      <widget class="QLineEdit" name="leIDKey"/>
     </item>
     <item row="6" column="0">
      <widget class="QTableWidget" name="tblScenes">
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0" alignment="Qt::AlignHCenter">
+     <widget class="QPushButton" name="btnRegID">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Register ID key</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="0">
+     <widget class="QTableWidget" name="tblBsp">
       <property name="editTriggers">
        <set>QAbstractItemView::NoEditTriggers</set>
       </property>

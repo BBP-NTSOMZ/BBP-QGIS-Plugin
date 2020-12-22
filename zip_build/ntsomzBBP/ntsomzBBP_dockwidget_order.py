@@ -24,6 +24,7 @@
 
 import os
 
+from qgis.core import QgsRectangle, QgsCoordinateReferenceSystem, QgsCoordinateTransform
 from qgis.PyQt import QtGui, QtWidgets, uic
 from qgis.PyQt.QtCore import pyqtSignal, Qt, QDateTime
 from qgis.PyQt.QtWidgets import (
@@ -39,6 +40,7 @@ from qgis.core import (
     QgsRasterLayer,
     QgsProject
 )
+from .bbp_requests import bsp_product
 from datetime import datetime
 from . import bbp_requests
 from .bbp_requests import bbp_order, bbp_search
@@ -62,11 +64,11 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 #@dataclass
 class checkedDataStructure():
 
-    isChecked:bool = False
+    isChecked: bool = False
     data: Any = None
-    layer:QgsRasterLayer = None
+    layer: QgsRasterLayer = None
     
-    def __init__(self, isChecked:bool, data: Any, layer:QgsRasterLayer = None):
+    def __init__(self, isChecked: bool, data: Any, layer: QgsRasterLayer = None):
         self.isChecked - isChecked
         self.data = data
         self.layer = layer
@@ -84,20 +86,25 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # After setupUI you can access any designer object by doing
         # self.<objectname>, and you can use autoconnect slots - see
         # http://doc.qt.io/qt-5/designer-using-a-ui-file.html
-        # #widgets-and-dialogs-with-auto-connect
-        #self.initForm()
+        # # widgets-and-dialogs-with-auto-connect
+        # self.initForm()
         self.iface = None
         self.scene_layer = None  
         self.orders = list()
         self.scenes = list()
         self.ordered_scenes = dict()
         self.request_order = None
+
+        self.mosaicList = None
+        self.bspApiKey = None
+
         self.setupUi(self)
         
-    def setupUi(self,parent):
+    def setupUi(self, parent):
         super(NTSOMZ_BBPCatalogDockWidget, self).setupUi(parent)
-        #self.setupOrdersTab()
+        # self.setupOrdersTab()
         self.setupScenesTab()
+        self.setupBspTab()
     
     def setupScenesTab(self):
         """
@@ -113,7 +120,123 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.tblScenes.setColumnCount(2)
         self.tblScenes.setHorizontalHeaderLabels(["Scene ID", "Product"])
             #["Selected", "Scene ID", "Product", "Order", "Available"])
-  
+
+    def getLayersName(self):
+        nameLayersList = []
+
+        mapLayers = QgsProject.instance().mapLayers()
+        for layer_uniqName, layerObj in mapLayers.items():
+            nameLayersList.append(layerObj.name())
+
+        return nameLayersList
+
+    def createBspLayer(self, URL, fullName, max_zoom, min_zoom):
+        rasterLayer = None
+        layers = self.getLayersName()
+
+        if not fullName in layers:
+            rasterLayer = QgsRasterLayer("type=xyz&url=" + URL  # префикс URL + URL
+                                         + '?api_key=' + self.bspApiKey  # префикс ключа + ключ
+                                         + '&zmax={zmax}&zmin={zmin}'.format(zmax=max_zoom,zmin=min_zoom), # min-max zoom
+                                         fullName, "wms")
+            QgsProject.instance().addMapLayer(rasterLayer)
+
+        return rasterLayer
+
+
+    def addAllBspLayers(self):
+        objectsList = self.mosaicList
+        if objectsList is None:
+            QMessageBox.about(self, "NTSOMZ_BBPCatalog", "List of mosaics is empty")
+            return
+
+        for object in objectsList:
+            fullName = object.mosaic_id + ':' + object.tile_services.productType + ':' + object.tile_services.color_representation
+            self.createBspLayer(object.tile_services.color_representation, fullName, object.tile_services.max_zoom, object.tile_services.min_zoom)
+
+            if not object.tile_services.additional_colors.colors is None:
+                for additColor, additColorUrl in object.tile_services.additional_colors.colors.items():
+                    fullName = object.mosaic_id + ':' + object.tile_services.productType + ':' + additColor
+                    self.createBspLayer(additColorUrl, fullName, object.tile_services.max_zoom, object.tile_services.min_zoom)
+
+    def addBspLayer(self, selectedRow, selectedColumn):
+        # columns 1 and 2
+        if selectedColumn in range(2):
+            local_mosaic_id = self.tblBsp.item(selectedRow, 0).text()
+            local_productType = self.tblBsp.item(selectedRow, 1).text()
+            local_color_representation = self.tblBsp.cellWidget(selectedRow, 2).currentText()
+
+            fullName = local_mosaic_id+':'+local_productType+':'+local_color_representation
+
+            objectsList = self.mosaicList
+            if objectsList is None:
+                return
+
+            for object in objectsList:
+                if object.mosaic_id == local_mosaic_id:
+                    if object.tile_services.productType == local_productType:
+                        URL = None
+
+                        if local_color_representation in object.tile_services.color_representation:
+                            URL = object.tile_services.main_url
+                        elif local_color_representation in object.tile_services.additional_colors.colors.keys():
+                            URL = object.tile_services.additional_colors.colors[local_color_representation]
+
+                        if not URL is None:
+                            rasterLayer = self.createBspLayer(URL, fullName, object.tile_services.max_zoom, object.tile_services.min_zoom)
+                            if not rasterLayer is None:
+                                boundingbox = object.tile_services.bbox
+                                crsSrc = QgsCoordinateReferenceSystem("EPSG:4326")  # WGS 84
+                                crsDest = QgsCoordinateReferenceSystem("EPSG:3857")  # Preudo-mercator
+                                transformContext = QgsProject.instance().transformContext()
+                                xform = QgsCoordinateTransform(crsSrc, crsDest, transformContext)
+                                boundingbox = [*xform.transform(boundingbox[0], boundingbox[1]), *xform.transform(boundingbox[2], boundingbox[3])]
+
+                                extentRect = QgsRectangle(*boundingbox)
+                                rasterLayer.setExtent(extentRect)
+
+                                canvas = self.iface.mapCanvas()
+                                canvas.setExtent(rasterLayer.extent())
+
+    def updateBspTable(self):
+        self.tblBsp.clear()
+        self.tblBsp.setRowCount(0)
+
+        self.tblBsp.setHorizontalHeaderLabels(["Mosaic ID", "Product type", "Color representation"])
+
+        objectsList = self.mosaicList
+        if objectsList is None:
+            return
+
+        self.tblBsp.setRowCount(len(objectsList))
+        for index, object in enumerate(objectsList):
+            self.tblBsp.setItem(index, 0, QTableWidgetItem(object.mosaic_id))
+            self.tblBsp.setItem(index, 1, QTableWidgetItem(object.tile_services.productType))
+
+            colorBox = QtWidgets.QComboBox()
+            colorBox.addItem(object.tile_services.color_representation)
+            self.tblBsp.setCellWidget(index, 2, colorBox)
+
+            if not object.tile_services.additional_colors.colors is None:
+                for additColor, additColorUrl in object.tile_services.additional_colors.colors.items():
+                    colorBox.addItem(additColor)
+
+        self.tblBsp.resizeColumnsToContents()
+
+    def setupBspTab(self):
+        self.tblBsp.setColumnCount(3)
+        self.tblBsp.setHorizontalHeaderLabels(["Mosaic ID", "Product type", "Color representation"])
+
+    def getBSP(self):
+        ret = True
+        self.mosaicList = bsp_product.sendBspRequest(self.bspApiKey)
+
+        if self.mosaicList is None:
+            # QMessageBox.about(self, "NTSOMZ_BBPCatalog", "BSP request failed. Possible reasons:\n1. Server is down.\n2. API key is invalid.")
+            ret = False
+
+        return ret
+
     def closeEvent(self, event):
         self.closingPlugin.emit()
         event.accept()
@@ -123,14 +246,14 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if self.request_order is None:
             self.request_order = bbp_order.requestOrders()
             if self.request_order is None:
-                QMessageBox.about(self, "NTSOMZ_BBPCatalog", "Order request Failed")
+                # QMessageBox.about(self, "NTSOMZ_BBPCatalog", "Orders request Failed")
                 return False
         current_orders = None
         current_scenes = None
         current_orders = self.request_order.getOrders()
         print(current_orders)
         if current_orders is None:
-            QMessageBox.about(self, "NTSOMZ_BBPCatalog", "Request failed. Possible reasons:\n 1. Server is down.\n 2. API key is invalid.")
+            # QMessageBox.about(self, "NTSOMZ_BBPCatalog", "Orders request failed. Possible reasons:\n1. Server is down.\n2. API key is invalid.")
             self.scenes = None
             self.orders = None
             ret = False
@@ -148,6 +271,7 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     if i.data == j.data:
                         i.isChecked = j.isChecked
             return ListInQuestion
+
         if ret:
             self.orders = crosscheck(self.orders, current_orders)
             self.scenes = crosscheck(self.scenes, current_scenes)
@@ -155,13 +279,9 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         return ret
 
     def updateSceneTable(self):
-        """
-        scenes columns:
-            1. checkbox
-            2. orderID
-            3. products
-        """
         self.tblScenes.clear()
+        self.tblScenes.setRowCount(0)
+
         self.tblScenes.setHorizontalHeaderLabels(["Scene ID", "Product"])
         if self.scenes is None:
             return
@@ -169,7 +289,7 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.tblScenes.setRowCount(len(local_scenes))
         for index, scene in enumerate(local_scenes):
             isChecked: bool = scene.isChecked
-            scene:bbp_order.Product = scene.data
+            scene: bbp_order.Product = scene.data
             """
             chbx = QTableWidgetItem()
             btn = QPushButton()
@@ -199,11 +319,28 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         key = self.leIDKey.text()
         prev_key = BBPSetting().instance.key
         BBPSetting().setAPIKey(key)
-        ret = self.loadOrders()
-        if not ret:
+        retScene = self.loadOrders()
+        if not retScene:
             BBPSetting().setAPIKey(prev_key)
             self.leIDKey.setText(prev_key)
         self.updateTabWidget()
+
+        # BSP part
+        self.bspApiKey = key
+        retBsp = self.getBSP()
+        self.updateBspTable()
+
+        try:
+            len_scenes = len(self.scenes)
+        except TypeError:
+            if self.scenes is None:
+                len_scenes = 0
+
+        if len_scenes == 0 or not retBsp:
+            QMessageBox.about(self, "NTSOMZ_BBPCatalog", "Request failed. Can`t load scenes or/and mosaics.\nPossible reasons:\n"
+                                                         "1. No scenes or/and mosaics for this API key.\n"
+                                                         "2. API key is invalid.\n"
+                                                         "3. Server is down.")
 
     def on_tableScenes_item_change(self, item: QTableWidgetItem):
         r = item.row()

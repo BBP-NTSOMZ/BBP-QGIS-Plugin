@@ -116,7 +116,8 @@ class Scene():
     sensor_id: Optional[str] = None,
     sensor_zenith_angle: Optional[float] = None	,
     sun_azimuth_angle: Optional[float] = None,
-    sun_zenith_angle: Optional[float] = None):
+    sun_zenith_angle: Optional[float] = None,
+    **kwargs):
         self.acquisition_date                = acquisition_date               
         self.acquisition_date_start          = acquisition_date_start         
         self.acquisition_date_stop           = acquisition_date_stop          
@@ -145,6 +146,7 @@ class Scene():
         self.sensor_zenith_angle             = sensor_zenith_angle            
         self.sun_azimuth_angle               = sun_azimuth_angle              
         self.sun_zenith_angle                = sun_zenith_angle     
+        self.__UNPARSED_ARGS__ = kwargs #TODO: USE THEM! REINTERPRET THIS!
         self.__post_init__()          
 
     def __post_init__(self):
@@ -191,12 +193,13 @@ class TileService():
     min_zoom: int = 0,
     max_zoom: int = 18,
     color_representation: Optional[Any] = None,
-    ):
+    **kwargs):
         self.url                    = url                 
         self.bbox                   = bbox                
         self.min_zoom               = min_zoom            
         self.max_zoom               = max_zoom            
         self.color_representation   = color_representation
+        self.__UNPARSED_ARGS__ = kwargs #TODO: USE THEM! REINTERPRET THIS!
 
     def getBoundingRect(self)->(Point, Point):
         ilen = len(self.bbox)
@@ -222,12 +225,13 @@ class Product():
     id:str,
     product: str,
     tile_service: TileService = None,
-    parent: "Order" = None
-    ):
+    parent: "Order" = None,
+    **kwargs):
         self.id             = id           
         self.product        = product      
         self.tile_service   = tile_service 
-        self.parent         = parent       
+        self.parent         = parent  
+        self.__UNPARSED_ARGS__ = kwargs #TODO: USE THEM! REINTERPRET THIS!     
         self.__post_init__()
 
     def __post_init__(self):
@@ -281,8 +285,8 @@ class Order():
     responsive_id: Optional[str] = None,
     source: Optional[str] = None,
     state: Optional[str] = None,
-    tile_services: Optional[dict] = dict()
-    ):  
+    tile_services: Optional[dict] = dict(),
+    **kwargs):
         self.archive_structure  = archive_structure
         self.completed          = completed        
         self.composites         = composites       
@@ -296,6 +300,7 @@ class Order():
         self.source             = source           
         self.state              = state            
         self.tile_services      = tile_services    
+        self.__UNPARSED_ARGS__ = kwargs #TODO: USE THEM! REINTERPRET THIS!
 
 
     def getProducts(self)->List[Product]:

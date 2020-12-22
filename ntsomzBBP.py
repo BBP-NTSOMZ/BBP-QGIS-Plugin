@@ -232,6 +232,9 @@ class NTSOMZ_BBPCatalog:
                 #QMessageBox.about(None, "NTSOMZ_BBPCatalog", "run if dockwidget == None: "+str(self.dockwidget))
                 self.dockwidget.iface = self.iface
 
+                # self.dockwidget.btnBsp.clicked.connect(self.dockwidget.addAllBspLayers)
+                self.dockwidget.tblBsp.cellDoubleClicked.connect(self.dockwidget.addBspLayer)
+
             # connect to provide cleanup on closing of dockwidget
             self.dockwidget.closingPlugin.connect(self.onClosePlugin)
 

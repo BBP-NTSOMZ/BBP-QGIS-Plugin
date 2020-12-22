@@ -2,6 +2,7 @@ from typing import List, Union, Optional
 from datetime import datetime
 from os.path import dirname, join
 from . import geometry
+from ..params.setting import BBPSetting
 from .bbp_objects import Scene, BrowseImage, BoundingShape
 # import bbp_key
 # import geometry
