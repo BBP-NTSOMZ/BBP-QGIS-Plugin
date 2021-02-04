@@ -6,9 +6,9 @@
 name=RKS Basic Products Bank  
 qgisMinimumVersion=3.0
 description=Access to BBP of RKS
-version=0.2
-author=Pankin A.V. @ NTSOMZ
-email=pankin_av@ntsomz.ru
+version=1.0
+author=Meshkov M.V. @ NTSOMZ
+email=mmeshkov@ntsomz.ru
 
 about=Plugin provides basic interfaces to Basic Products Bank of Roscosmos
 

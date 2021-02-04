@@ -8,8 +8,8 @@
                               -------------------
         begin                : 2020-04-10
         git sha              : $Format:%H$
-        copyright            : (C) 2020 by Pankin A.V. @ NTSOMZ
-        email                : pankin_av@ntsomz.ru
+        copyright            : (C) 2020 by Meshkov M.V. @ NTSOMZ
+        email                : mmeshkov@ntsomz.ru
  ***************************************************************************/
 
 /***************************************************************************
@@ -232,8 +232,13 @@ class NTSOMZ_BBPCatalog:
                 #QMessageBox.about(None, "NTSOMZ_BBPCatalog", "run if dockwidget == None: "+str(self.dockwidget))
                 self.dockwidget.iface = self.iface
 
-                # self.dockwidget.btnBsp.clicked.connect(self.dockwidget.addAllBspLayers)
-                self.dockwidget.tblBsp.cellDoubleClicked.connect(self.dockwidget.addBspLayer)
+                self.dockwidget.tblTree.itemDoubleClicked.connect(self.dockwidget.addBspLayer)
+
+                self.dockwidget.btnRefreshScn.clicked.connect(self.dockwidget.updateData)
+                self.dockwidget.btnRefreshBsp.clicked.connect(self.dockwidget.updateData)
+
+                self.dockwidget.btnExpand.clicked.connect(self.dockwidget.treeExpand)
+                self.dockwidget.btnHide.clicked.connect(self.dockwidget.treeHide)
 
             # connect to provide cleanup on closing of dockwidget
             self.dockwidget.closingPlugin.connect(self.onClosePlugin)

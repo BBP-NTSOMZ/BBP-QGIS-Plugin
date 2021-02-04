@@ -1,5 +1,13 @@
 <RCC>
-    <qresource prefix="/plugins/ntsomzBBP" >
+    <qresource prefix="/plugins/ntsomzBBP">
         <file>icon.png</file>
+    </qresource>
+
+    <qresource prefix="/icons">
+        <file>region.ico</file>
+        <file>refresh.ico</file>
+        <file>green-mark.ico</file>
+        <file>red-cross.ico</file>
+        <file>cart.ico</file>
     </qresource>
 </RCC>

@@ -1,0 +1,346 @@
+0;Весь мир;WORLD;WORLD
+1;СНГ и Прибалтика;CIS_PRIBALT;CIS_PRIBALT
+2;ЮРФ;;SRF
+3;СФО;SFO;SFO
+4;ЦЧ;Centr_chernozem;CCH
+5;СЗ;Severo-Zapad;SZ
+6;ВЛГ;"Volga";VLG
+8;Москва и Московская область;Moscow city and Moscow region;MOS
+9;Санкт-Петербург и Ленинградская область;City of St. Petersburg and Leningrad Region;SPB
+12;Севастополь и Республика Крым;American Samoa;CRM
+101;Республика Адыгея;Adygea, Republic of;RU01
+102;Республика Башкортостан;Bashkortostan, Republic of;RU02
+103;Республика Бурятия;Buryatia, Republic of;RU03
+104;Республика Алтай;Altai Republic;RU04
+105;Республика Дагестан;Dagestan, Republic of;RU05
+106;Республика Ингушетия;Ingushetia, Republic of;RU06
+107;Кабардино-Балкарская Республика;Kabardino-Balkar Republic;RU07
+108;Республика Калмыкия;Kalmykia, Republic of;RU08
+109;Карачаево-Черкесская Республика;Karachay-Cherkess Republic;RU09
+110;Республика Карелия;Karelia, Republic of;RU10
+111;Республика Коми;Komi Republic;RU11
+112;Республика Марий Эл;Mari El Republic;RU12
+113;Республика Мордовия;Mordovia, Republic of;RU13
+114;Республика Саха (Якутия);Sakha (Yakutia) Republic;RU14
+115;Республика Северная Осетия — Алания;North Ossetia-Alania, Republic of;RU15
+116;Республика Татарстан;Tatarstan, Republic of;RU16
+117;Республика Тыва;Tuva Republic;RU17
+118;Удмуртская Республика;Udmurt Republic;RU18
+119;Республика Хакасия;Khakassia, Republic of;RU19
+120;Чеченская Республика;Chechen Republic;RU20
+121;Чувашская Республика;Chuvash Republic;RU21
+122;Алтайский край;Altai Krai;RU22
+123;Краснодарский край;Krasnodar Krai;RU23
+124;Красноярский край;Krasnoyarsk Krai;RU24
+125;Приморский край;Primorsky Krai;RU25
+126;Ставропольский край;Stavropol Krai;RU26
+127;Хабаровский край;Khabarovsk Krai;RU27
+128;Амурская область;Amur Oblast;RU28
+129;Архангельская область;Arkhangelsk Oblast;RU29
+130;Астраханская область;Astrakhan Oblast;RU30
+131;Белгородская область;Belgorod Oblast;RU31
+132;Брянская область;Bryansk Oblast;RU32
+133;Владимирская область;Vladimir Oblast;RU33
+134;Волгоградская область;Volgograd Oblast;RU34
+135;Вологодская область;Vologda Oblast;RU35
+136;Воронежская область;Voronezh Oblast;RU36
+137;Ивановская область;Ivanovo Oblast;RU37
+138;Иркутская область;Irkutsk Oblast;RU38
+139;Калининградская область;Kaliningrad Oblast;RU39
+140;Калужская область;Kaluga Oblast;RU40
+141;Камчатский край;Kamchatka Krai;RU41
+142;Кемеровская область;Kemerovo Oblast;RU42
+143;Кировская область;Kirov Oblast;RU43
+144;Костромская область;Kostroma Oblast;RU44
+145;Курганская область;Kurgan Oblast;RU45
+146;Курская область;Kursk Oblast;RU46
+147;Ленинградская область;Leningrad Oblast;RU47
+148;Липецкая область;Lipetsk Oblast;RU48
+149;Магаданская область;Magadan Oblast;RU49
+150;Московская область;Moscow Oblast;RU50
+151;Мурманская область;Murmansk Oblast;RU51
+152;Нижегородская область;Nizhny Novgorod Oblast;RU52
+153;Новгородская область;Novgorod Oblast;RU53
+154;Новосибирская область;Novosibirsk Oblast;RU54
+155;Омская область;Omsk Oblast;RU55
+156;Оренбургская область;Orenburg Oblast;RU56
+157;Орловская область;Oryol Oblast;RU57
+158;Пензенская область;Penza Oblast;RU58
+159;Пермский край;Perm Krai;RU59
+160;Псковская область;Pskov Oblast;RU60
+161;Ростовская область;Rostov Oblast;RU61
+162;Рязанская область;Ryazan Oblast;RU62
+163;Самарская область;Samara Oblast;RU63
+164;Саратовская область;Saratov Oblast;RU64
+165;Сахалинская область;Sakhalin Oblast;RU65
+166;Свердловская область;Sverdlovsk Oblast;RU66
+167;Смоленская область;Smolensk Oblast;RU67
+168;Тамбовская область;Tambov Oblast;RU68
+169;Тверская область;Tver Oblast;RU69
+170;Томская область;Tomsk Oblast;RU70
+171;Тульская область;Tula Oblast;RU71
+172;Тюменская область;Tyumen Oblast;RU72
+173;Ульяновская область;Ulyanovsk Oblast;RU73
+174;Челябинская область;Chelyabinsk Oblast;RU74
+175;Забайкальский край;Zabaykalsky Krai;RU75
+176;Ярославская область;Yaroslavl Oblast;RU76
+177;Москва;Moscow;RU77
+178;Санкт-Петербург;Saint Petersburg;RU78
+179;Еврейская автономная область;Jewish Autonomous Oblast;RU79
+183;Ненецкий автономный округ;Nenets Autonomous Okrug;RU83
+186;Ханты-Мансийский автономный округ - Югра;Khanty–Mansi Autonomous Okrug – Yugra;RU86
+187;Чукотский автономный округ;Chukotka Autonomous Okrug;RU87
+189;Ямало-Ненецкий автономный округ;Yamalo-Nenets Autonomous Okrug;RU89
+191;Республика Крым;Republic of Crimea;RU91
+192;Севастополь;Sevastopol;RU92
+250;Российская Федерация;Russian Federation;RUS
+251;Армения;Armenia;ARM
+252;Азербайджан;Azerbaijan;AZE
+253;Беларусь;Belarus;BLR
+254;Казахстан;Kazakhstan;KAZ
+255;Киргизия;Kyrgyzstan;KGZ
+256;Молдова;Moldova;MDA
+257;Таджикистан;Tajikistan;TJK
+258;Узбекистан;Uzbekistan;UZB
+259;Грузия;Georgia;GEO
+260;Туркменистан;Turkmenistan;TKM
+261;Украина;Ukraine;UKR
+262;Латвия;Latvia;LVA
+263;Литва;Lithuania;LTU
+264;Эстония;Estonia;EST
+265;Австралия;;AUS
+266;Абхазия;;ABH
+267;Австрия;Austria;AUT
+268;Албания;Albania;ALB
+269;Алжир;Algeria;DZA
+270;Американское Самоа;American Samoa;ASM
+271;Ангилья;Anguilla;AIA
+272;Ангола;Angola;AGO
+273;Андорра;Andorra;AND
+274;Антарктида;Antarctic;ATA
+275;Антигуа и Барбуда;Antigua and Barbuda;ATG
+276;Аргентина;Argentina;ARG
+277;Аруба;Aruba;ABW
+278;Афганистан;Afghanistan;AFG
+279;Багамы;Bahamas;BHS
+280;Бангладеш;Bangladesh;BGD
+281;Барбадос;Barbados;BRB
+282;Бахрейн;Bahrain;BHR
+283;Белиз;Belize;BLZ
+284;Бельгия;Belgium;BEL
+285;Бенин;Benin;BEN
+286;Бермуды;Bermuda;BMU
+287;Болгария;Bulgaria;BGR
+288;Боливия, Многонациональное Государство;Bolivia;BOL
+289;Бонэйр, Синт-Эстатиус и Саба;;BES
+290;Босния и Герцеговина;Bosnia & Herzegovina;BIH
+291;Ботсвана;Botswana;BWA
+292;Бразилия;Brazil;BRA
+293;Британская Территория в Индийском Океане;British Indian Ocean Territory;IOT
+294;Бруней-Даруссалам;Brunei Darussalam;BRN_
+295;Буркина-Фасо;Burkina-Faso;BFA
+296;Бурунди;Burundi;BDI
+297;Бутан;Bhutan;BTN
+298;Вануату;Vanuatu;VUT
+299;Венгрия;Hungary;HUN
+300;Венесуэла (Боливарианская Республика);Venezuela;VEN
+301;Виргинские Острова (Британские);Virgin Islands, British;VGB
+302;Виргинские Острова (Сша);Virgin Islands, US;VIR
+303;Вьетнам;Viet Nam;VNM
+304;Габон;Gabon;GAB
+305;Гайана;Guyana;GUY
+306;Гаити;Haiti;HTI
+307;Гамбия;Gambia;GMB
+308;Гана;Ghana;GHA
+309;Гваделупа;Guadeloupe;GLP
+310;Гватемала;Guatemala;GTM
+311;Гвинея;Guinea;GIN
+312;Гвинея-Бисау;Guinea-Bissau;GNB
+313;Германия;Germany;DEU
+314;Гернси;;GGY
+315;Гибралтар;Gibraltar;GIB
+316;Гондурас;Honduras;HND
+317;Гонконг;Hong Kong;HKG
+318;Гренада;Grenada;GRD
+319;Гренландия;Greenland;GRL
+320;Греция;Greece;GRC
+321;Гуам;Guam;GUM
+322;Дания;Denmark;DNK
+323;Джерси;;JEY
+324;Джибути;Djibouti;DJI
+325;Доминика;Dominica;DMA
+326;Доминиканская Республика;Dominican Republic;DOM
+327;Египет;Egypt;EGY
+328;Замбия;Zambia;ZMB
+329;Западная Сахара;Western Sahara;ESH
+330;Зимбабве;Zimbabwe;ZWE
+331;Йемен;Yemen;YEM
+332;Израиль;Israel;ISR
+333;Индия;India;IND
+334;Индонезия;Indonesia;IDN
+335;Иордания;Jordan;JOR
+336;Ирак;Iraq;IRQ
+337;Иран (Исламская Республика);Iran;IRN
+338;Ирландия;Ireland;IRL
+339;Исландия;Iceland;ISL
+340;Испания;Spain;ESP
+341;Италия;Italy;ITA
+342;Кабо-Верде;Cape Verde;CPV
+343;Камбоджа;Cambodia;KHM
+344;Камерун;Cameroon;CMR
+345;Канада;Canada;CAN
+346;Катар;Qatar;QAT
+347;Кения;Kenya;KEN
+348;Кипр;Cyprus;CYP
+349;Кирибати;Kiribati;KIR
+350;Китай;China;CHN
+351;Кокосовые (Килинг) Острова;Cocos (Keeling) Islands;CCK
+352;Колумбия;Colombia;COL
+353;Коморы;Comoros;COM
+354;Конго;Congo;COG
+355;Конго, Демократическая Республика;Congo, Democratic Republic of the;COD
+356;Корея, Народно-Демократическая Республика;Korea (North);PRK
+357;Корея, Республика;Korea (South);KOR
+358;Коста-Рика;Costa Rica;CRI
+359;Кот Д`Ивуар;Cote d'Ivoire;CIV
+360;Куба;Cuba;CUB
+361;Кувейт;Kuwait;KWT
+362;Кюрасао;;CUW
+363;Лаосская Народно-Демократическая Республика;Lao People's Democratic Republic;LAO
+364;Лесото;Lesotho;LSO
+365;Либерия;Liberia;LBR
+366;Ливан;Lebanon;LBN
+367;Ливия;Libyan Arab Jamahiriya;LBY
+368;Лихтенштейн;Liechtenstein;LIE
+369;Люксембург;Luxembourg;LUX
+370;Маврикий;Mauritius;MUS
+371;Мавритания;Mauritania;MRT
+372;Мадагаскар;Madagascar;MDG
+373;Майотта;Mayotte;MYT
+374;Макао;Macau (Macao);MAC
+375;Малави;Malawi;MWI
+376;Малайзия;Malaysia;MYS
+377;Мали;Mali;MLI
+378;Малые Тихоокеанские Отдаленные Острова Соединенных Штатов;United States Minor Outlying Islands;UMI
+379;Мальдивы;Maldives;MDV
+380;Мальта;Malta;MLT
+381;Марокко;Marocco;MAR
+382;Мартиника;Martinique;MTQ
+383;Маршалловы Острова;Marshall Islands;MHL
+384;Мексика;Mexico;MEX
+385;Микронезия, Федеративные Штаты;Federated States of Micronesia;FSM
+386;Мозамбик;Mozambique;MOZ
+387;Монако;Monaco;MCO
+388;Монголия;Mongolia;MNG
+389;Монтсеррат;Montserrat;MSR
+390;Мьянма;Myanmar;MMR
+391;Намибия;Namibia;NAM
+392;Науру;Nauru;NRU
+393;Непал;Nepal;NPL
+394;Нигер;Niger;NER
+395;Нигерия;Nigeria;NGA
+396;Нидерланды;Netherlands (Holland);NLD
+397;Никарагуа;Nicaragua;NIC
+398;Ниуэ;Niue;NIU
+399;Новая Зеландия;New Zealand;NZL
+400;Новая Каледония;New Caledonia;NCL
+401;Норвегия;Norway;NOR
+402;Объединенные Арабские Эмираты;United Arab Emirates;ARE
+403;Оман;Oman;OMN
+404;Остров Буве;Bouvet Island;BVT
+405;Остров Мэн;;IMN
+406;Остров Норфолк;Norfolk Island;NFK
+407;Остров Рождества;Christmas Island;CXR
+408;Остров Херд и Острова Макдональд;Heard and McDonald Islands;HMD
+409;Острова Кайман;Cayman Islands;CYM
+410;Острова Кука;Cook Islands;COK
+411;Острова Теркс и Кайкос;Turks and Caicos Islands;TCA
+412;Пакистан;Pakistan;PAK
+413;Палау;Palau;PLW
+414;Палестина, Государство;Pales nian Territory (occupied);PSE
+415;Панама;Panama;PAN
+416;Папский Престол (Государство-Город Ватикан);Vatican (Holy See);VAT
+417;Папуа Новая Гвинея;Papua New Guinea;PNG
+418;Парагвай;Paraguay;PRY
+419;Перу;Peru;PER
+420;Питкерн;Pitcairn;PCN
+421;Польша;Poland;POL
+422;Португалия;Portugal;PRT
+423;Пуэрто-Рико;Puerto Rico;PRI
+424;Реюньон;Reunion;REU
+425;Руанда;Rwanda;RWA
+426;Румыния;Romania;ROU
+427;Самоа;Samoa;WSM
+428;Сан-Марино;San Marino;SMR_
+429;Сан-Томе и Принсипи;Sao Tomea and Principe;STP
+430;Саудовская Аравия;Saudi Arabia;SAU
+431;Святая Елена, Остров Вознесения, Тристан-Да-Кунья;St. Helena;SHN
+432;Северная Македония;Macedonia;MKD
+433;Северные Марианские Острова;Northern Mariana Islands;MNP
+434;Сейшелы;Seychelles;SYC
+435;Сен-Бартелеми;;BLM
+436;Сенегал;Senegal;SEN
+437;Сен-Мартен (Нидерландская Часть);;SXM
+438;Сен-Мартен (Французская Часть);;MAF
+439;Сент-Винсент и Гренадины;Saint Vincent and the Grenadines;VCT
+440;Сент-Китс и Невис;Saint Kitts (Christopher) and Nevis;KNA
+441;Сент-Люсия;Saint Lucia;LCA
+442;Сент-Пьер и Микелон;St. Pierre and Miquelon;SPM
+443;Сербия;;SRB
+444;Сингапур;Singapore;SGP
+445;Сирийская Арабская Республика;Syria;SYR
+446;Словакия;Slovak Republic;SVK
+447;Словения;Slovenia;SVN
+448;Соединенное Королевство;Great Britain (United Kingdom);GBR
+449;Соединенные Штаты;United States of America;USA
+450;Соломоновы Острова;Solomon Islands;SLB
+451;Сомали;Somali;SOM
+452;Судан;;SDN
+453;Суринам;Surinam;SUR
+454;Сьерра-Леоне;Sierra Leone;SLE
+455;Тайвань (Китай);Taiwan;TWN
+456;Таиланд;Thailand;THA
+457;Танзания, Объединенная Республика;Tanzania;TZA
+458;Тимор-Лесте;East Timor;TLS
+459;Того;Togo;TGO
+460;Токелау;Tokelau;TKL
+461;Тонга;Tonga;TON
+462;Тринидад и Тобаго;Trinidad and Tobago;TTO
+463;Тувалу;Tuvalu;TUV
+464;Тунис;Tunisia;TUN
+465;Турция;Turkey;TUR
+466;Уганда;Uganda;UGA
+467;Уоллис и Футуна;Wallis and Futuna Islands;WLF
+468;Уругвай;Uruguay;URY
+469;Фарерские Острова;Faroe Islands;FRO
+470;Фиджи;Fiji;FJI
+471;Филиппины;Philippines;PHL
+472;Финляндия;Finland;FIN
+473;Фолклендские Острова (Мальвинские);Falkland (Malvinas) Islands;FLK
+474;Франция;France;FRA
+475;Французская Гвиана;French Guyana;GUF
+476;Французская Полинезия;French Polynesia;PYF
+477;Французские Южные Территории;French Southern Territories;ATF
+478;Хорватия;Croatia;HRV
+479;Центрально-Африканская Республика;Central African Republic;CAF
+480;Чад;Chad;TCD
+481;Черногория;;MNE
+482;Чехия;Czech Republic;CZE
+483;Чили;Chili;CHL
+484;Швейцария;Switzerland;CHE
+485;Швеция;Sweden;SWE
+486;Шпицберген и Ян Майен;Svalbard and Jan Mayen Islands;SJM
+487;Шри-Ланка;Sri Lanka;LKA
+488;Эквадор;Ecuador;ECU
+489;Экваториальная Гвинея;Equatorial Guinea;GNQ
+490;Эландские Острова;;ALA
+491;Эль-Сальвадор;El Salvador;SLV
+492;Эритрея;Eritrea;ERI
+493;Эсватини;Swaziland;SWZ
+494;Эфиопия;Ethiopia;ETH
+495;Южная Африка;South Africa;ZAF
+496;Южная Джорджия и Южные Сандвичевы Острова;South Georgia and the South Sandwich Islands;SGS
+497;Южная Осетия;;OST
+498;Южный Судан;;SSD
+499;Ямайка;Jamaica;JAM
+500;Япония;Japan;JPN

@@ -8,8 +8,8 @@
                              -------------------
         begin                : 2020-04-10
         git sha              : $Format:%H$
-        copyright            : (C) 2020 by Pankin A.V. @ NTSOMZ
-        email                : pankin_av@ntsomz.ru
+        copyright            : (C) 2020 by Meshkov M.V. @ NTSOMZ
+        email                : mmeshkov@ntsomz.ru
  ***************************************************************************/
 
 /***************************************************************************
@@ -23,65 +23,73 @@
 """
 
 import os
+import time
+import json
+
+from PyQt5.QtGui import QFont, QIcon
 
 from qgis.core import QgsRectangle, QgsCoordinateReferenceSystem, QgsCoordinateTransform
 from qgis.PyQt import QtGui, QtWidgets, uic
 from qgis.PyQt.QtCore import pyqtSignal, Qt, QDateTime
+
 from qgis.PyQt.QtWidgets import (
     QWidget,
-    QListWidgetItem, 
-    QTableWidgetItem, 
+    QListWidgetItem,
+    QTableWidgetItem,
     QMessageBox,
     QPushButton,
-    QHBoxLayout
+    QHBoxLayout,
+    QTreeWidget,
+    QTreeWidgetItem
 )
 from qgis.core import (
     QgsVectorLayer,
     QgsRasterLayer,
-    QgsProject
+    QgsProject,
+    QgsFillSymbol
 )
-from .bbp_requests import bsp_product
+from .bbp_requests import bsp_product, bbp_neworder, bbp_reorder # new
 from datetime import datetime
 from . import bbp_requests
 from .bbp_requests import bbp_order, bbp_search
 from .bbp_requests.iLayers.layered import create_layer
 from .bbp_requests.bbp_objects import (
-    Scene, 
-    BrowseImage, 
+    Scene,
+    BrowseImage,
     BoundingShape,
-    Order, 
-    Product, 
-    TileService, 
+    Order,
+    Product,
+    TileService,
     Point
 )
+from os.path import dirname
 from .params.setting import BBPSetting
 from typing import Any, List
-#from dataclasses import dataclass,field
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'ntsomzBBP_dockwidget_order_based.ui'))
 
-#@dataclass
-class checkedDataStructure():
 
+# @dataclass
+class checkedDataStructure():
     isChecked: bool = False
     data: Any = None
     layer: QgsRasterLayer = None
-    
+
     def __init__(self, isChecked: bool, data: Any, layer: QgsRasterLayer = None):
         self.isChecked - isChecked
         self.data = data
         self.layer = layer
 
-class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
+class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     closingPlugin = pyqtSignal()
 
     def __init__(self, parent=None):
         """Constructor."""
-        #QMessageBox.about(None, "NTSOMZ_BBPCatalogDockWidget", "__init__: "+str(parent))
+        # QMessageBox.about(None, "NTSOMZ_BBPCatalogDockWidget", "__init__: "+str(parent))
         super(NTSOMZ_BBPCatalogDockWidget, self).__init__(parent)
-        #QMessageBox.about(None, "NTSOMZ_BBPCatalogDockWidget", "__init__: "+str(parent))
+        # QMessageBox.about(None, "NTSOMZ_BBPCatalogDockWidget", "__init__: "+str(parent))
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
         # self.<objectname>, and you can use autoconnect slots - see
@@ -89,24 +97,37 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # # widgets-and-dialogs-with-auto-connect
         # self.initForm()
         self.iface = None
-        self.scene_layer = None  
+        self.scene_layer = None
         self.orders = list()
         self.scenes = list()
         self.ordered_scenes = dict()
         self.request_order = None
 
-        self.regMsg = False
         self.mosaicList = None
         self.bspApiKey = None
+        self.objectsData = list()
+
+        self.expired_scenes = None
+        self.new_scenes = None
+
+        self.temp_layer = None
 
         self.setupUi(self)
-        
+
     def setupUi(self, parent):
         super(NTSOMZ_BBPCatalogDockWidget, self).setupUi(parent)
+
+        QgsProject.instance().layerWasAdded.connect(self.layerAdded)
+
         # self.setupOrdersTab()
+        icon = QIcon()
+        icon.addFile(":/icons/refresh.ico")
+        self.btnRefreshScn.setIcon(icon)
+        self.btnRefreshBsp.setIcon(icon)
+
         self.setupScenesTab()
-        self.setupBspTab()
-    
+        self.setupStartUI()
+
     def setupScenesTab(self):
         """
         scenes columns:
@@ -118,9 +139,18 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """
         key: str = BBPSetting().instance.key
         self.leIDKey.setText(key)
-        self.tblScenes.setColumnCount(2)
-        self.tblScenes.setHorizontalHeaderLabels(["Scene ID", "Product"])
-            #["Selected", "Scene ID", "Product", "Order", "Available"])
+        # self.tblScenes.setColumnCount(2)
+        # self.tblScenes.setHorizontalHeaderLabels(["Scene ID", "Product"])
+        # ["Selected", "Scene ID", "Product", "Order", "Available"])
+
+    def layerAdded(self):
+        '''
+        QMessageBox.about(self, "NTSOMZ_BBPCatalog", str('added'))
+        if self.temp_layer is not None:
+            QMessageBox.about(self, "NTSOMZ_BBPCatalog", str(self.temp_layer))
+            self.iface.setActiveLayer(self.temp_layer)
+        '''
+        pass
 
     def getLayersName(self):
         nameLayersList = []
@@ -138,102 +168,308 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if not fullName in layers:
             rasterLayer = QgsRasterLayer("type=xyz&url=" + URL  # префикс URL + URL
                                          + '?api_key=' + self.bspApiKey  # префикс ключа + ключ
-                                         + '&zmax={zmax}&zmin={zmin}'.format(zmax=max_zoom,zmin=min_zoom), # min-max zoom
+                                         + '&zmax={zmax}&zmin={zmin}'.format(zmax=max_zoom, zmin=min_zoom),
+                                         # min-max zoom
                                          fullName, "wms")
             QgsProject.instance().addMapLayer(rasterLayer)
 
         return rasterLayer
 
+    def addBspLayer(self, item_clicked, column_clicked):
+        for item, url, max_zoom, min_zoom, bbox in self.objectsData:
+            if item_clicked == item:
+                listName = []
+                listName.append(item.text(column_clicked))
+                while item.parent() is not None:
+                    partName = item.parent().text(column_clicked)
+                    listName.append(partName)
+                    item = item.parent()
 
-    def addAllBspLayers(self):
+                listName = reversed(listName)
+                fullName = '_'.join(listName)
+
+                if not url is None:
+                    rasterLayer = self.createBspLayer(url, fullName, max_zoom, min_zoom)
+                    if not rasterLayer is None:
+                        boundingbox = bbox
+                        crsSrc = QgsCoordinateReferenceSystem("EPSG:4326")  # WGS 84
+                        crsDest = QgsCoordinateReferenceSystem("EPSG:3857")  # Preudo-mercator
+                        transformContext = QgsProject.instance().transformContext()
+                        xform = QgsCoordinateTransform(crsSrc, crsDest, transformContext)
+                        boundingbox = [*xform.transform(boundingbox[0], boundingbox[1]),
+                                       *xform.transform(boundingbox[2], boundingbox[3])]
+
+                        extentRect = QgsRectangle(*boundingbox)
+                        rasterLayer.setExtent(extentRect)
+
+                        canvas = self.iface.mapCanvas()
+                        canvas.setExtent(rasterLayer.extent())
+
+    def translateResolution(self, id):
+        # ru, eng
+        lang = 'ru'
+
+        if lang == 'ru':
+            resolutions = {'L': 'Низкое разрешение', 'M': 'Среднее разрешение',
+                           'H': 'Высокое разрешение', 'VH': 'Очень высокое разрешение'}
+        elif lang == 'eng':
+            resolutions = {'L': 'Low', 'M': 'Medium', 'H': 'High', 'VH': 'Very high'}
+
+        try:
+            desc = resolutions[id]
+            return desc
+        except KeyError:
+            pass
+
+        return id
+
+    def translateRegion(self, region_id):
+        # ru, eng
+        lang = 'ru'
+        loc_dir = dirname(__file__)
+
+        filedir = 'bbp_requests'
+        filename = 'regions.csv'
+        filepath = os.path.join(loc_dir, filedir, filename)
+
+        try:
+            with open(filepath, 'r', encoding='windows-1251') as region_file:
+                for line in region_file:
+                    line = line.strip()
+                    line_num, ru, eng, id = line.split(";")
+                    if region_id == id:
+                        if lang == 'ru':
+                            return ru
+                        if lang == 'eng':
+                            return eng
+        except BaseException:
+            return region_id
+
+        return region_id
+
+    def updateBspTree(self):
+        bold_font = QFont("Times", 10, QFont.DemiBold)
+
+        self.tblTree.clear()
+
         objectsList = self.mosaicList
         if objectsList is None:
-            QMessageBox.about(self, "NTSOMZ_BBPCatalog", "List of mosaics is empty")
             return
+
+        self.objectsData = []
 
         for object in objectsList:
-            fullName = object.mosaic_id + ':' + object.tile_services.productType + ':' + object.tile_services.color_representation
-            self.createBspLayer(object.tile_services.color_representation, fullName, object.tile_services.max_zoom, object.tile_services.min_zoom)
+            transl_region = self.translateRegion(object.region_id)
+            regionGroup = self.tblTree.findItems(transl_region, Qt.MatchExactly, 0)
+            if len(regionGroup) == 0:
+                RegionLevel = QTreeWidgetItem()
+                RegionLevel.setFont(0, bold_font)
+                RegionLevel.setText(0, str(transl_region))
+                self.tblTree.addTopLevelItem(RegionLevel)
 
+            resolutionCount = RegionLevel.childCount()
+            resolutionHeaders = []
+            for num in range(0, resolutionCount):
+                resolutionHeaders.append(RegionLevel.child(num).text(0))
+
+            transl_res = self.translateResolution(object.resolution)
+            if transl_res not in resolutionHeaders:
+                resolutionLevel = QTreeWidgetItem()
+                resolutionLevel.setText(0, str(transl_res))
+                RegionLevel.addChild(resolutionLevel)
+
+            dateLevel = QTreeWidgetItem()
+
+            startDate, startTime = object.date_range[0].split('T')
+            endDate, startTime = object.date_range[1].split('T')
+
+            date = '{start} - {end}'.format(start=startDate, end=endDate)
+            dateLevel.setText(0, str(date))
+            resolutionLevel.addChild(dateLevel)
+
+            productColors = {}
+            productColors[object.tile_services.color_representation] = object.tile_services.main_url
             if not object.tile_services.additional_colors.colors is None:
                 for additColor, additColorUrl in object.tile_services.additional_colors.colors.items():
-                    fullName = object.mosaic_id + ':' + object.tile_services.productType + ':' + additColor
-                    self.createBspLayer(additColorUrl, fullName, object.tile_services.max_zoom, object.tile_services.min_zoom)
+                    productColors[additColor] = additColorUrl
 
-    def addBspLayer(self, selectedRow, selectedColumn):
-        # columns 1 and 2
-        if selectedColumn in range(2):
-            local_mosaic_id = self.tblBsp.item(selectedRow, 0).text()
-            local_productType = self.tblBsp.item(selectedRow, 1).text()
-            local_color_representation = self.tblBsp.cellWidget(selectedRow, 2).currentText()
+            for color, url in productColors.items():
+                item = QTreeWidgetItem()
+                product = '{type} [{color}]'.format(type=object.tile_services.productType, color=color)
+                item.setText(0, str(product))
 
-            fullName = local_mosaic_id+':'+local_productType+':'+local_color_representation
+                icon = QIcon()
+                icon.addFile(":/icons/region.ico")
+                item.setIcon(0, icon)
 
-            objectsList = self.mosaicList
-            if objectsList is None:
-                return
+                dateLevel.addChild(item)
+                self.objectsData.append(tuple((item, url,
+                                               object.tile_services.max_zoom,
+                                               object.tile_services.min_zoom,
+                                               object.tile_services.bbox)))
+        return
 
-            for object in objectsList:
-                if object.mosaic_id == local_mosaic_id:
-                    if object.tile_services.productType == local_productType:
-                        URL = None
+    def sceneReOrder(self, row, column):
+        req_json = None
 
-                        if local_color_representation in object.tile_services.color_representation:
-                            URL = object.tile_services.main_url
-                        elif local_color_representation in object.tile_services.additional_colors.colors.keys():
-                            URL = object.tile_services.additional_colors.colors[local_color_representation]
+        scene = self.tblScenesExp.item(row, 0).text()
+        prod_dict = dict()
+        new_order_data = dict()
 
-                        if not URL is None:
-                            rasterLayer = self.createBspLayer(URL, fullName, object.tile_services.max_zoom, object.tile_services.min_zoom)
-                            if not rasterLayer is None:
-                                boundingbox = object.tile_services.bbox
-                                crsSrc = QgsCoordinateReferenceSystem("EPSG:4326")  # WGS 84
-                                crsDest = QgsCoordinateReferenceSystem("EPSG:3857")  # Preudo-mercator
-                                transformContext = QgsProject.instance().transformContext()
-                                xform = QgsCoordinateTransform(crsSrc, crsDest, transformContext)
-                                boundingbox = [*xform.transform(boundingbox[0], boundingbox[1]), *xform.transform(boundingbox[2], boundingbox[3])]
+        prod_data = self.tblScenesExp.cellWidget(row, 1)
+        if prod_data is None:
+            prod_val = self.tblScenesExp.item(row, 1).text()
+            prod_dict[prod_val] = None
+        else:
+            all_items = [prod_data.itemText(i) for i in range(prod_data.count())]
+            for item in all_items:
+                prod_dict[item] = None
 
-                                extentRect = QgsRectangle(*boundingbox)
-                                rasterLayer.setExtent(extentRect)
+        new_order_data[scene] = prod_dict
 
-                                canvas = self.iface.mapCanvas()
-                                canvas.setExtent(rasterLayer.extent())
+        req_json = dict(pointer="QGIS-Plugin", products=new_order_data)
+        resp = bbp_reorder.sendReOrderRequest(self.bspApiKey, req_json)
 
-    def updateBspTable(self):
-        self.tblBsp.clear()
-        self.tblBsp.setRowCount(0)
+        if resp is not None:
+            QMessageBox.about(self, "NTSOMZ_BBPCatalog", "The order has been created. Scene is placed in the 'New' tab.\nThis scene will appear in the 'Completed' tab after processing.")
+        else:
+            QMessageBox.about(self, "NTSOMZ_BBPCatalog", "Creation order error. Please, try again.")
 
-        self.tblBsp.setHorizontalHeaderLabels(["Mosaic ID", "Product type", "Color representation"])
+        self.updateData()
 
-        objectsList = self.mosaicList
-        if objectsList is None:
+    def updateNewTab(self):
+        self.tblScenesNew.clear()
+        self.tblScenesNew.setRowCount(0)
+
+        self.tblScenesNew.setColumnCount(3)
+        self.tblScenesNew.setHorizontalHeaderLabels(["Scene ID", "Product", "Created date"])
+        if self.new_scenes is None:
             return
 
-        self.tblBsp.setRowCount(len(objectsList))
-        for index, object in enumerate(objectsList):
-            self.tblBsp.setItem(index, 0, QTableWidgetItem(object.mosaic_id))
-            self.tblBsp.setItem(index, 1, QTableWidgetItem(object.tile_services.productType))
+        self.setStyleSheet("QComboBox {background: transparent; border: none; selection-background-color: lightgray; color: black}")
 
-            colorBox = QtWidgets.QComboBox()
-            colorBox.addItem(object.tile_services.color_representation)
-            self.tblBsp.setCellWidget(index, 2, colorBox)
+        local_scenes = [i for i in self.new_scenes]
+        index = 0
+        for scene in local_scenes:
+            for id, products in scene.products.items():
+                currentRowCount = self.tblScenesNew.rowCount()
+                self.tblScenesNew.insertRow(currentRowCount)
 
-            if not object.tile_services.additional_colors.colors is None:
-                for additColor, additColorUrl in object.tile_services.additional_colors.colors.items():
-                    colorBox.addItem(additColor)
+                self.tblScenesNew.setItem(index, 0, QTableWidgetItem(str(id)))
 
-        self.tblBsp.resizeColumnsToContents()
+                if len(products) > 1:
+                    prodsBox = QtWidgets.QComboBox()
+                    for prod in products:
+                        prodsBox.addItem(prod)
+                    self.tblScenesNew.setCellWidget(index, 1, prodsBox)
+                else:
+                    for prod in products:
+                        self.tblScenesNew.setItem(index, 1, QTableWidgetItem(str(prod)))
 
-    def setupBspTab(self):
-        self.tblBsp.setColumnCount(3)
-        self.tblBsp.setHorizontalHeaderLabels(["Mosaic ID", "Product type", "Color representation"])
+                try:
+                    st_time = datetime.strptime(str(scene.created), "%Y-%m-%dT%H:%M:%S.%fZ")
+                    ftime = str(st_time).rsplit('.', 1)[0]
+                except ValueError:
+                    ftime = 'null'
+                self.tblScenesNew.setItem(index, 2, QTableWidgetItem(str(ftime)))
+                index += 1
+
+        self.tblScenesNew.resizeColumnsToContents()
+        self.tblScenesNew.setColumnWidth(1, 65)    # ширина столбца с продуктами
+
+    def updateExpiredTab(self):
+        self.tblScenesExp.clear()
+        self.tblScenesExp.setRowCount(0)
+
+        self.tblScenesExp.setColumnCount(4)
+        self.tblScenesExp.setHorizontalHeaderLabels(["Scene ID", "Product", "Expired date", "Order"])
+        if self.expired_scenes is None:
+            return
+
+        self.setStyleSheet("QComboBox {background: transparent; border: none; selection-background-color: lightgray; color: black}")
+
+        local_scenes = [i for i in self.expired_scenes]
+        index = 0
+        for scene in local_scenes:
+            for id, products in scene.products.items():
+                currentRowCount = self.tblScenesExp.rowCount()
+                self.tblScenesExp.insertRow(currentRowCount)
+
+                self.tblScenesExp.setItem(index, 0, QTableWidgetItem(str(id)))
+
+                if len(products) > 1:
+                    prodsBox = QtWidgets.QComboBox()
+                    for prod in products:
+                        prodsBox.addItem(prod)
+                    self.tblScenesExp.setCellWidget(index, 1, prodsBox)
+                else:
+                    for prod in products:
+                        self.tblScenesExp.setItem(index, 1, QTableWidgetItem(str(prod)))
+
+                try:
+                    st_time = datetime.strptime(str(scene.expires), "%Y-%m-%dT%H:%M:%SZ")
+                except ValueError:
+                    st_time = 'null'
+                self.tblScenesExp.setItem(index, 2, QTableWidgetItem(str(st_time)))
+
+                icon = QIcon()
+                icon.addFile(":/icons/cart.ico")
+                btnReOrder = QPushButton()
+                btnReOrder.setIcon(icon)
+                self.tblScenesExp.setCellWidget(index, 3, btnReOrder)
+                btnReOrder.clicked.connect(lambda *args, row=index, column=3: self.sceneReOrder(row, column))
+
+                index += 1
+
+        self.tblScenesExp.resizeColumnsToContents()
+        self.tblScenesExp.setColumnWidth(1, 65)    # ширина столбца с продуктами
+
+    def setupStartUI(self):
+        # скрываем все таблицы
+        self.tblScenes.setVisible(False)
+        self.tblScenesExp.setVisible(False)
+        self.tblScenesNew.setVisible(False)
+        self.tblTree.setVisible(False)
+
+        # скрываем все подписи к таблицам
+        self.labelScenes.setVisible(False)
+        self.labelScenesExp.setVisible(False)
+        self.labelScenesNew.setVisible(False)
+        self.labelBsp.setVisible(False)
+
+        # скрываем кнопки для мозаик
+        self.btnExpand.setVisible(False)
+        self.btnHide.setVisible(False)
+
+    def treeExpand(self):
+        self.tblTree.expandAll()
+
+    def treeHide(self):
+        self.tblTree.collapseAll()
+
+    def getExpired(self):
+        ret = True
+        self.expired_scenes = bbp_neworder.sendBspRequest(self.bspApiKey, state=['expired'])
+
+        if self.expired_scenes is None:
+            ret = False
+
+        return ret
+
+    def getNew(self):
+        ret = True
+        self.new_scenes = bbp_neworder.sendBspRequest(self.bspApiKey, state=['created', 'processing'])
+
+        if self.new_scenes is None:
+            ret = False
+
+        return ret
 
     def getBSP(self):
         ret = True
         self.mosaicList = bsp_product.sendBspRequest(self.bspApiKey)
 
         if self.mosaicList is None:
-            # QMessageBox.about(self, "NTSOMZ_BBPCatalog", "BSP request failed. Possible reasons:\n1. Server is down.\n2. API key is invalid.")
             ret = False
 
         return ret
@@ -262,7 +498,8 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             current_orders = [checkedDataStructure(False, i) for i in current_orders]
             current_scenes = [checkedDataStructure(False, j) for i in current_orders for j in i.data.getProducts() if not j.tile_service is None]
             print(current_scenes)
-        def crosscheck(ListReference:List[checkedDataStructure], ListInQuestion:List[checkedDataStructure]):
+
+        def crosscheck(ListReference: List[checkedDataStructure], ListInQuestion: List[checkedDataStructure]):
             if ListReference is None:
                 return ListInQuestion
             if ListInQuestion is None:
@@ -283,6 +520,7 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.tblScenes.clear()
         self.tblScenes.setRowCount(0)
 
+        self.tblScenes.setColumnCount(2)
         self.tblScenes.setHorizontalHeaderLabels(["Scene ID", "Product"])
         if self.scenes is None:
             return
@@ -291,48 +529,28 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         for index, scene in enumerate(local_scenes):
             isChecked: bool = scene.isChecked
             scene: bbp_order.Product = scene.data
-            """
-            chbx = QTableWidgetItem()
-            btn = QPushButton()
-            btn.setText("Add")
-            lay = QHBoxLayout()
-            lay.addWidget(btn)
-            lay.setAlignment(Qt.AlignCenter)
-            lay.setContentsMargins(0, 0, 0, 0)
-            chbx.setLayout(lay)
-            QWidget* pWidget = new QWidget();
-            QPushButton* btn_edit = new QPushButton();
-            btn_edit->setText("Edit");
-            QHBoxLayout* pLayout = new QHBoxLayout(pWidget);
-            pLayout->addWidget(btn_edit);
-            pLayout->setAlignment(Qt::AlignCenter);
-            pLayout->setContentsMargins(0, 0, 0, 0);
-            pWidget->setLayout(pLayout);
-            ui.table->setCellWidget(i, 3, pWidget);
-            """
+
             self.tblScenes.setItem(index, 0, QTableWidgetItem(str(scene.id)))
             self.tblScenes.setItem(index, 1, QTableWidgetItem(str(scene.product)))
+
+        self.tblScenes.resizeColumnsToContents()
 
     def updateTabWidget(self):
         self.updateSceneTable()
 
-    def on_registed_ID_click(self):
-        self.regMsg = False
-        key = self.leIDKey.text()
-        prev_key = BBPSetting().instance.key
-        BBPSetting().setAPIKey(key)
-        retScene = self.loadOrders()
-        if not retScene:
-            BBPSetting().setAPIKey(prev_key)
-            self.leIDKey.setText(prev_key)
-            self.regMsg = True
-            QMessageBox.about(self, "NTSOMZ_BBPCatalog", "Key registration failed.\n\nPossible reasons:\n1. API key is invalid.\n2. Server is down.")
+    def updateData(self):
         self.updateTabWidget()
+        self.loadOrders()
 
         # BSP part
-        self.bspApiKey = key
         retBsp = self.getBSP()
-        self.updateBspTable()
+        self.updateBspTree()
+
+        retExpired = self.getExpired()
+        self.updateExpiredTab()
+
+        retNew = self.getNew()
+        self.updateNewTab()
 
         try:
             len_scenes = len(self.scenes)
@@ -340,24 +558,144 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             if self.scenes is None:
                 len_scenes = 0
 
-        if not self.regMsg:
-            scenesMsg = ''
-            bspMsg = ''
+        try:
+            len_expired_scenes = len(self.expired_scenes)
+        except TypeError:
+            if self.expired_scenes is None:
+                len_expired_scenes = 0
 
-            if len_scenes == 0:
-                scenesMsg = "Can`t load scenes. Orders not found in BBP interactive catalog.\n"
+        try:
+            len_new_scenes = len(self.new_scenes)
+        except TypeError:
+            if self.new_scenes is None:
+                len_new_scenes = 0
 
-            if not retBsp:
-                bspMsg = "\nNo mosaics available for the specified API key.\n"
+        # No found scenes
+        if len_scenes == 0:
+            icon = QIcon()
+            icon.addFile(":/icons/red-cross.ico")
+            self.tabWidget.setTabIcon(0, icon)
 
-            QMessageBox.about(self, "NTSOMZ_BBPCatalog", scenesMsg+bspMsg)
+            # скрываем таблицу со сценами
+            self.tblScenes.setVisible(False)
+
+            # отображаем сообщение о ненайденных сценах
+            self.labelScenes.setText("Can`t load completed scenes. Orders not found in BBP interactive catalog.")
+            self.labelScenes.setVisible(True)
+
+        # Scenes founded
+        else:
+            icon = QIcon()
+            icon.addFile(":/icons/green-mark.ico")
+            self.tabWidget.setTabIcon(0, icon)
+
+            # выводим таблицу со сценами
+            self.tblScenes.setVisible(True)
+
+            # скрываем сообщение о ненайденных сценах
+            self.labelScenes.clear()
+            self.labelScenes.setVisible(False)
+
+        # No found BSP
+        if not retBsp:
+            icon = QIcon()
+            icon.addFile(":/icons/red-cross.ico")
+            self.tabWidget.setTabIcon(1, icon)
+
+            self.btnExpand.setEnabled(False)
+            self.btnHide.setEnabled(False)
+
+            self.btnExpand.setVisible(False)
+            self.btnHide.setVisible(False)
+
+            self.tblTree.setVisible(False)
+            self.labelBsp.setText("No mosaics available for the specified API key.")
+            self.labelBsp.setVisible(True)
+
+        # BSP founded
+        else:
+            icon = QIcon()
+            icon.addFile(":/icons/green-mark.ico")
+            self.tabWidget.setTabIcon(1, icon)
+
+            self.btnExpand.setEnabled(True)
+            self.btnHide.setEnabled(True)
+
+            self.btnExpand.setVisible(True)
+            self.btnHide.setVisible(True)
+
+            self.tblTree.setVisible(True)
+            self.labelBsp.clear()
+            self.labelBsp.setVisible(False)
+
+        # No found expired scenes
+        if len_expired_scenes == 0:
+            # скрываем таблицу с просроченными сценами
+            self.tblScenesExp.setVisible(False)
+
+            # отображаем сообщение о ненайденных просроченных сценах
+            self.labelScenesExp.setText("Can`t load expired scenes. Order history is empty in BBP interactive catalog.")
+            self.labelScenesExp.setVisible(True)
+
+        # Expired scenes founded
+        else:
+            # выводим таблицу с просроченными сценами
+            self.tblScenesExp.setVisible(True)
+
+            # скрываем сообщение о ненайденных просроченных сценах
+            self.labelScenesExp.clear()
+            self.labelScenesExp.setVisible(False)
+
+        # No found new scenes
+        if len_new_scenes == 0:
+            # скрываем таблицу с новыми сценами
+            self.tblScenesNew.setVisible(False)
+
+            # отображаем сообщение о ненайденных новых сценах
+            self.labelScenesNew.setText("Can`t load new scenes. Orders not found in BBP interactive catalog.")
+            self.labelScenesNew.setVisible(True)
+
+        # New scenes founded
+        else:
+            # выводим таблицу с новыми сценами
+            self.tblScenesNew.setVisible(True)
+
+            # скрываем сообщение о ненайденных новых сценах
+            self.labelScenesNew.clear()
+            self.labelScenesNew.setVisible(False)
+
+    def on_registed_ID_click(self):
+        key = self.leIDKey.text()
+        prev_key = BBPSetting().instance.key
+        BBPSetting().setAPIKey(key)
+        retScene = self.loadOrders()
+        if not retScene:
+            BBPSetting().setAPIKey(prev_key)
+            self.leIDKey.setText(prev_key)
+            self.bspApiKey = prev_key
+            QMessageBox.about(self, "NTSOMZ_BBPCatalog", "Key registration failed.\n\nPossible reasons:\n1. API key is invalid.\n2. Server is down.")
+        else:
+            self.bspApiKey = key
+
+            # отключаем повторный ввод ключа
+            self.frame.setEnabled(False)
+
+            # включаем кнопку обновления содержимого
+            self.btnRefreshScn.setEnabled(True)
+            self.btnRefreshScn.setVisible(True)
+
+            self.btnRefreshBsp.setEnabled(True)
+            self.btnRefreshBsp.setVisible(True)
+
+            QMessageBox.about(self, "NTSOMZ_BBPCatalog", "Key registered successfully.")
+        self.updateData()
 
     def on_tableScenes_item_change(self, item: QTableWidgetItem):
         r = item.row()
         c = item.column()
         itemData = None if r >= len(self.scenes) and r < 0 else self.scenes[r]
-        if itemData is None:  
-            return 
+        if itemData is None:
+            return
         if not itemData.layer is None:
             try:
                 print(itemData.layer.id())
@@ -365,7 +703,7 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 itemData.layer = None
         if itemData.layer is None:
             layer = self.createMapLayer(itemData.data)
-            if not layer is None: 
+            if not layer is None:
                 itemData.layer = layer
                 self.scenes[r] = itemData
                 proj = QgsProject.instance()
@@ -382,7 +720,7 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 pass
             self.scene_layer = None
 
-    def createMapLayer(self,product):
+    def createMapLayer(self, product):
         tile_service: TileService = None
         scene_found: Scene = None
         tile_service, scene_found = self.__get_datasource(product)
@@ -415,9 +753,9 @@ class NTSOMZ_BBPCatalogDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             self.addMapLayer(checked_Scene)
 
     @staticmethod
-    def __get_datasource(scene:Product)->(TileService, Scene):
+    def __get_datasource(scene: Product) -> (TileService, Scene):
         sceneInfo = bbp_search.search_scene(scene.id, scene.product)
         return (scene.tile_service, sceneInfo)
 
-    def on_tabWidget_change(self, tabIndex:int):
+    def on_tabWidget_change(self, tabIndex: int):
         pass

@@ -23,8 +23,12 @@ class Tile_services:
 
 
 class Mosaic:
-    def __init__(self, mosaic_id, products, productType, color_representation, main_url, min_zoom, max_zoom, bbox, additional_colors):
+    def __init__(self, date_range, mosaic_id, region_id, resolution, sensors_group_id, products, productType, color_representation, main_url, min_zoom, max_zoom, bbox, additional_colors):
+        self.date_range = date_range
         self.mosaic_id = mosaic_id
+        self.region_id = region_id
+        self.resolution = resolution
+        self.sensors_group_id = sensors_group_id
         self.products = products
         self.tile_services = Tile_services(productType, color_representation, main_url, min_zoom, max_zoom, bbox, additional_colors)
 
@@ -92,7 +96,11 @@ def sendBspRequest(apiKey):
     objectsList = []
     jsonBody = resp_js_cont
     for BSP in jsonBody['result']:
+        date_range = BSP['date_range']
         mosaic_id = BSP['mosaic_id']
+        region_id = BSP['region_id']
+        resolution = BSP['resolution']
+        sensors_group_id = BSP['sensors_group_id']
         products = BSP['products']
 
         for productType in BSP['tile_services']:
@@ -115,12 +123,13 @@ def sendBspRequest(apiKey):
             except TypeError:
                 additionalColorsList = None
 
-            object = Mosaic(mosaic_id, products, productType, main_color_representation, main_color_url, min_zoom,
+            object = Mosaic(date_range, mosaic_id, region_id, resolution, sensors_group_id,
+                            products, productType, main_color_representation, main_color_url, min_zoom,
                             max_zoom, bbox, additionalColorsList)
             objectsList.append(object)
 
     for obj in objectsList:
-        print(obj.mosaic_id, obj.products,
+        print(obj.date_range, obj.mosaic_id, obj.products, obj.region_id, obj.resolution, obj.sensors_group_id,
               obj.tile_services.productType, obj.tile_services.main_url, obj.tile_services.color_representation,
               obj.tile_services.max_zoom, obj.tile_services.min_zoom, obj.tile_services.bbox,
               obj.tile_services.additional_colors.colors)
@@ -132,7 +141,7 @@ def sendBspRequest(apiKey):
 
 
 def main():
-    testKey = 'MTkxMjkyMDU.MTkxMjkyNDY.e161e47730-023faa-d6ac2c'
+    testKey = ''
     sendBspRequest(testKey)
 
 
